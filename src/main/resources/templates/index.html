@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF Compressor</title>
+    <link rel="stylesheet" th:href="@{/style.css}" href="/style.css" />
+</head>
+<body>
+
+<div class="page">
+
+    <header class="header">
+        <div class="logo">📄 PDF Compressor</div>
+        <p class="tagline">Shrink your PDFs in seconds. Fast, private, no watermarks.</p>
+    </header>
+
+    <main class="card">
+
+        <div id="dropzone" class="dropzone">
+            <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden />
+            <div class="dropzone-content">
+                <div class="dropzone-icon">⬆️</div>
+                <p class="dropzone-title">Drag &amp; drop your PDF here</p>
+                <p class="dropzone-sub">or click to browse</p>
+            </div>
+        </div>
+
+        <div id="fileInfo" class="file-info hidden">
+            <span id="fileName" class="file-name"></span>
+            <span id="fileSize" class="file-size"></span>
+            <button id="removeFile" class="link-btn" type="button">Remove</button>
+        </div>
+
+        <div class="options">
+            <label class="options-label">Compression level</label>
+            <div class="level-choices">
+                <label class="level-choice">
+                    <input type="radio" name="level" value="LOW" />
+                    <span>Low <small>(best quality)</small></span>
+                </label>
+                <label class="level-choice">
+                    <input type="radio" name="level" value="MEDIUM" checked />
+                    <span>Medium <small>(recommended)</small></span>
+                </label>
+                <label class="level-choice">
+                    <input type="radio" name="level" value="HIGH" />
+                    <span>High <small>(smallest file)</small></span>
+                </label>
+            </div>
+        </div>
+
+        <button id="compressBtn" class="primary-btn" type="button" disabled>
+            Compress PDF
+        </button>
+
+        <div id="progress" class="progress hidden">
+            <div class="spinner"></div>
+            <span>Compressing your PDF…</span>
+        </div>
+
+        <div id="result" class="result hidden">
+            <div class="result-stats">
+                <div class="stat">
+                    <span class="stat-label">Original</span>
+                    <span id="statOriginal" class="stat-value">–</span>
+                </div>
+                <div class="stat-arrow">→</div>
+                <div class="stat">
+                    <span class="stat-label">Compressed</span>
+                    <span id="statCompressed" class="stat-value">–</span>
+                </div>
+                <div class="stat savings">
+                    <span class="stat-label">Saved</span>
+                    <span id="statSavings" class="stat-value">–</span>
+                </div>
+            </div>
+            <a id="downloadLink" class="primary-btn download-btn" href="#" download>
+                ⬇️ Download compressed PDF
+            </a>
+            <button id="startOver" class="link-btn" type="button">Compress another file</button>
+        </div>
+
+        <div id="errorBox" class="error hidden"></div>
+
+    </main>
+
+    <footer class="footer">
+        <p>Files are processed on the server and removed automatically after a short time.</p>
+    </footer>
+
+</div>
+
+<script th:src="@{/script.js}" src="/script.js"></script>
+</body>
+</html>
