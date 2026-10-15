@@ -56,12 +56,27 @@ public class PdfCompressionService {
 
     /**
      * Compress the given PDF bytes and return the resulting PDF bytes.
+     * Evaluates both native PDFBox raster downsampling and Ghostscript (if installed),
+     * returning the result that achieves the highest valid size reduction.
      *
      * @param input the original PDF file contents
      * @param level how aggressively to compress
      * @return compressed PDF bytes
      */
     public byte[] compress(byte[] input, CompressionLevel level) throws IOException {
+        byte[] pdfboxCompressed = compressWithPdfbox(input, level);
+
+        // Attempt Ghostscript compression if binary is available
+        byte[] gsCompressed = compressWithGhostscript(input, level);
+
+        if (gsCompressed != null && gsCompressed.length > 0 && gsCompressed.length < pdfboxCompressed.length) {
+            return gsCompressed;
+        }
+
+        return pdfboxCompressed;
+    }
+
+    public byte[] compressWithPdfbox(byte[] input, CompressionLevel level) throws IOException {
         try (PDDocument document = Loader.loadPDF(input)) {
 
             // Track which image resources we've already replaced so a
@@ -80,6 +95,68 @@ public class PdfCompressionService {
             document.save(out);
             return out.toByteArray();
         }
+    }
+
+    public byte[] compressWithGhostscript(byte[] input, CompressionLevel level) {
+        String gsPath = findGhostscript();
+        if (gsPath == null) {
+            return null;
+        }
+
+        String pdfSetting = switch (level) {
+            case HIGH -> "/screen";
+            case MEDIUM -> "/ebook";
+            case LOW -> "/printer";
+        };
+
+        try {
+            java.nio.file.Path tempIn = java.nio.file.Files.createTempFile("compress_in_", ".pdf");
+            java.nio.file.Path tempOut = java.nio.file.Files.createTempFile("compress_out_", ".pdf");
+
+            try {
+                java.nio.file.Files.write(tempIn, input);
+
+                ProcessBuilder pb = new ProcessBuilder(
+                        gsPath,
+                        "-sDEVICE=pdfwrite",
+                        "-dCompatibilityLevel=1.4",
+                        "-dPDFSETTINGS=" + pdfSetting,
+                        "-dNOPAUSE",
+                        "-dQUIET",
+                        "-dBATCH",
+                        "-sOutputFile=" + tempOut.toAbsolutePath().toString(),
+                        tempIn.toAbsolutePath().toString()
+                );
+
+                Process process = pb.start();
+                boolean finished = process.waitFor(20, java.util.concurrent.TimeUnit.SECONDS);
+
+                if (finished && process.exitValue() == 0 && java.nio.file.Files.exists(tempOut)) {
+                    byte[] outBytes = java.nio.file.Files.readAllBytes(tempOut);
+                    if (outBytes.length > 100) {
+                        return outBytes;
+                    }
+                }
+            } finally {
+                java.nio.file.Files.deleteIfExists(tempIn);
+                java.nio.file.Files.deleteIfExists(tempOut);
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    private String findGhostscript() {
+        String[] candidates = {"/opt/homebrew/bin/gs", "/usr/local/bin/gs", "/usr/bin/gs", "gs"};
+        for (String path : candidates) {
+            try {
+                Process p = new ProcessBuilder(path, "--version").start();
+                if (p.waitFor(2, java.util.concurrent.TimeUnit.SECONDS) && p.exitValue() == 0) {
+                    return path;
+                }
+            } catch (Exception ignored) {}
+        }
+        return null;
     }
 
     private void compressImagesInResources(PDDocument document,

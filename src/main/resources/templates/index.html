@@ -3,95 +3,340 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PDF Compressor</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9824538909107683"
-            crossorigin="anonymous"></script>
+    <title>PDFPulse — Every PDF task. One simple workspace.</title>
+    <meta name="description" content="Compress, convert, organize, and edit your documents with a simpler, privacy-first experience. In-memory processing, zero permanent storage." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/style.css}" href="/style.css" />
 </head>
 <body>
 
-<div class="page">
+<!-- Header -->
+<header class="app-header">
+    <div class="header-container">
+        <a href="#dashboard" class="brand" id="brandLogo">
+            <svg class="brand-logo-svg" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="28" height="28" rx="8" fill="#0F172A"/>
+                <path d="M8 7H16L20 11V21C20 21.5523 19.5523 22 19 22H8C7.44772 22 7 21.5523 7 21V8C7 7.44772 7.44772 7 8 7Z" stroke="#FFFFFF" stroke-width="1.75" stroke-linejoin="round"/>
+                <path d="M16 7V11H20" stroke="#FFFFFF" stroke-width="1.75" stroke-linejoin="round"/>
+                <circle cx="12" cy="16" r="2" fill="#6366F1"/>
+            </svg>
+            <span class="brand-name">PDFPulse</span>
+        </a>
 
-    <header class="header">
-        <div class="logo">📄 PDF Compressor</div>
-        <p class="tagline">Shrink your PDFs in seconds. Fast, private, no watermarks.</p>
-    </header>
+        <div class="header-search">
+            <svg class="search-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="toolSearchInput" placeholder="Search tools or describe what you want to do..." autocomplete="off" />
+            <kbd class="search-key">/</kbd>
+        </div>
 
-    <main class="card">
+        <nav class="header-nav">
+            <a href="#dashboard" class="nav-link active" data-nav="all">Tools</a>
+            <button id="openPrivacyModalBtn" class="nav-link privacy-trigger" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Privacy</span>
+            </button>
+        </nav>
+    </div>
+</header>
 
-        <div id="dropzone" class="dropzone">
-            <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden />
-            <div class="dropzone-content">
-                <div class="dropzone-icon">⬆️</div>
-                <p class="dropzone-title">Drag &amp; drop your PDF here</p>
-                <p class="dropzone-sub">or click to browse</p>
+<main class="main-shell">
+
+    <!-- DASHBOARD VIEW -->
+    <section id="dashboardView" class="dashboard-shell">
+        
+        <!-- Hero Section -->
+        <div class="hero">
+            <div class="privacy-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Your files stay yours. We don't store your documents.</span>
+            </div>
+            
+            <h1 class="hero-headline">Every PDF task.<br>One simple workspace.</h1>
+            <p class="hero-subline">Compress, convert, organize, and edit your documents with a simpler, privacy-first experience.</p>
+
+            <!-- Quick Action Chips -->
+            <div class="quick-actions">
+                <span class="quick-label">Popular:</span>
+                <a href="#compress" class="quick-chip" data-tool="compress">Compress PDF</a>
+                <a href="#merge" class="quick-chip" data-tool="merge">Merge PDF</a>
+                <a href="#organize" class="quick-chip" data-tool="organize">Organize PDF</a>
+                <a href="#pdf-to-word" class="quick-chip" data-tool="pdf-to-word">PDF to Word</a>
+                <a href="#img-to-pdf" class="quick-chip" data-tool="img-to-pdf">JPG to PDF</a>
+                <a href="#protect" class="quick-chip" data-tool="protect">Protect PDF</a>
+            </div>
+
+            <!-- Categories Bar -->
+            <div class="category-tabs" id="categoryTabs">
+                <button class="cat-tab active" data-category="all">All Tools</button>
+                <button class="cat-tab" data-category="popular">Popular</button>
+                <button class="cat-tab" data-category="organize">Organize PDF</button>
+                <button class="cat-tab" data-category="convert">Convert PDF</button>
+                <button class="cat-tab" data-category="edit">Edit PDF</button>
+                <button class="cat-tab" data-category="security">Security</button>
+                <button class="cat-tab" data-category="ocr">OCR &amp; Scan</button>
+                <button class="cat-tab" data-category="ai">AI Tools</button>
             </div>
         </div>
 
-        <div id="fileInfo" class="file-info hidden">
-            <span id="fileName" class="file-name"></span>
-            <span id="fileSize" class="file-size"></span>
-            <button id="removeFile" class="link-btn" type="button">Remove</button>
+        <!-- Tool Cards Grid -->
+        <div class="tools-grid" id="toolsGrid">
+            <!-- Dynamically populated via script.js -->
         </div>
 
-        <div class="options">
-            <label class="options-label">Compression level</label>
-            <div class="level-choices">
-                <label class="level-choice">
-                    <input type="radio" name="level" value="LOW" />
-                    <span>Low <small>(best quality)</small></span>
-                </label>
-                <label class="level-choice">
-                    <input type="radio" name="level" value="MEDIUM" checked />
-                    <span>Medium <small>(recommended)</small></span>
-                </label>
-                <label class="level-choice">
-                    <input type="radio" name="level" value="HIGH" />
-                    <span>High <small>(smallest file)</small></span>
-                </label>
+        <!-- No search results -->
+        <div id="noResultsFound" class="no-results hidden">
+            <p class="no-results-title">No tools matching your query</p>
+            <p class="no-results-desc">Try searching for terms like "compress", "merge", "split", "word", or "rotate".</p>
+            <button id="clearSearchBtn" class="clear-btn" type="button">Reset search</button>
+        </div>
+
+    </section>
+
+    <!-- DEDICATED TOOL WORKSPACE VIEW -->
+    <section id="toolWorkspace" class="workspace-shell hidden">
+        
+        <!-- Minimal Breadcrumb -->
+        <div class="workspace-top-bar">
+            <button id="backToDashboardBtn" class="back-link" type="button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>All tools</span>
+            </button>
+            <div class="workspace-crumbs">
+                <span id="workspaceCategoryLabel">Category</span>
+                <span class="crumb-slash">/</span>
+                <span id="workspaceToolLabel" class="crumb-current">Tool Name</span>
             </div>
         </div>
 
-        <button id="compressBtn" class="primary-btn" type="button" disabled>
-            Compress PDF
-        </button>
-
-        <div id="progress" class="progress hidden">
-            <div class="spinner"></div>
-            <span>Compressing your PDF…</span>
-        </div>
-
-        <div id="result" class="result hidden">
-            <div class="result-stats">
-                <div class="stat">
-                    <span class="stat-label">Original</span>
-                    <span id="statOriginal" class="stat-value">–</span>
+        <!-- Main Workspace Card -->
+        <div class="workspace-card">
+            
+            <!-- Tool Header -->
+            <div class="tool-intro">
+                <div class="tool-intro-icon-wrap" id="workspaceIconWrap">
+                    <!-- Injected SVG -->
                 </div>
-                <div class="stat-arrow">→</div>
-                <div class="stat">
-                    <span class="stat-label">Compressed</span>
-                    <span id="statCompressed" class="stat-value">–</span>
-                </div>
-                <div class="stat savings">
-                    <span class="stat-label">Saved</span>
-                    <span id="statSavings" class="stat-value">–</span>
+                <div class="tool-intro-text">
+                    <h2 id="workspaceHeading">Tool Title</h2>
+                    <p id="workspaceDescription">Tool description explaining the clear purpose.</p>
                 </div>
             </div>
-            <a id="downloadLink" class="primary-btn download-btn" href="#" download>
-                ⬇️ Download compressed PDF
-            </a>
-            <button id="startOver" class="link-btn" type="button">Compress another file</button>
+
+            <!-- Upload Area -->
+            <div id="dropzone" class="clean-dropzone">
+                <input type="file" id="fileInput" hidden />
+                <div class="dropzone-center">
+                    <div class="upload-icon-circle">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                    <p class="dropzone-main-text" id="dropzonePrompt">Choose a file or drag it here</p>
+                    <p class="dropzone-sub-text">PDF files up to 50 MB • Processed in memory</p>
+                </div>
+            </div>
+
+            <!-- Uploaded Files List -->
+            <div id="fileQueue" class="file-queue hidden">
+                <div class="queue-row-top">
+                    <span class="queue-heading">Selected Document</span>
+                    <button id="addMoreFilesBtn" class="add-another-btn hidden" type="button">+ Add another file</button>
+                </div>
+                <div id="fileListContainer" class="file-list"></div>
+            </div>
+
+            <!-- Tool Specific Configuration -->
+            <div id="toolConfigForm" class="options-drawer hidden">
+                <!-- Injected configuration controls -->
+            </div>
+
+            <!-- Action Button -->
+            <div class="action-row">
+                <button id="actionBtn" class="primary-btn" type="button" disabled>
+                    <span id="actionBtnText">Process Document</span>
+                </button>
+            </div>
+
+            <!-- PURPOSEFUL TOOL ANIMATION STAGE (During Processing) -->
+            <div id="animationStage" class="animation-stage hidden">
+                <div class="stage-motion-wrap" id="stageMotionBox">
+                    <!-- Dynamic tool-specific animation injected by script.js -->
+                </div>
+                <div class="stage-status-wrap">
+                    <p id="animationStatusText" class="animation-status-text">Processing your document...</p>
+                    <div class="subtle-progress-track">
+                        <div class="subtle-progress-bar"></div>
+                    </div>
+                    <span class="animation-sub-note">Executed in-memory with zero permanent storage</span>
+                </div>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="errorBanner" class="error-box hidden">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <div class="error-copy">
+                    <strong id="errorHeading">Operation failed</strong>
+                    <p id="errorMessage">Please check your file and try again.</p>
+                </div>
+                <button id="dismissErrorBtn" class="error-close" type="button" aria-label="Dismiss error">✕</button>
+            </div>
+
+            <!-- Clean Result Panel -->
+            <div id="resultState" class="result-panel hidden">
+                <div class="result-header">
+                    <div class="success-check-badge">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <div class="result-titles">
+                        <h3>Your document is ready</h3>
+                        <p id="resultSubMessage">Processed successfully and ready for download.</p>
+                    </div>
+                </div>
+
+                <!-- Compression / Difference Metrics -->
+                <div id="resultMetrics" class="result-metrics-grid">
+                    <div class="metric-item">
+                        <span class="metric-key">Original Size</span>
+                        <span id="statOriginal" class="metric-number">–</span>
+                    </div>
+                    <div class="metric-arrow-div">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-key">New Size</span>
+                        <span id="statResult" class="metric-number highlight">–</span>
+                    </div>
+                    <div id="statSavingsCard" class="metric-item savings-item">
+                        <span class="metric-key">Reduction</span>
+                        <span id="statSavings" class="metric-number green">–</span>
+                    </div>
+                </div>
+
+                <!-- Text / Metadata / AI Viewer -->
+                <div id="richDataViewer" class="data-preview-box hidden">
+                    <div class="data-preview-top">
+                        <span id="viewerTitle" class="data-preview-title">Document Content</span>
+                        <button id="copyDataBtn" class="copy-btn" type="button">Copy to clipboard</button>
+                    </div>
+                    <pre id="viewerContent" class="data-preview-content"></pre>
+                </div>
+
+                <!-- Primary Download Action -->
+                <div class="download-container">
+                    <a id="downloadBtn" class="download-button" href="#" download>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Download Result</span>
+                    </a>
+                </div>
+
+                <!-- Footer next-step links -->
+                <div class="result-footer-nav">
+                    <button id="processAnotherBtn" class="link-action" type="button">Process another file</button>
+                    <span class="crumb-slash">•</span>
+                    <button id="returnHomeBtn" class="link-action" type="button">Back to tools</button>
+                </div>
+            </div>
+
+            <!-- Upload Area Privacy Statement -->
+            <div class="upload-privacy-note">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <span>Files are processed in-memory for your requested task and are never permanently stored.</span>
+            </div>
+
         </div>
+    </section>
 
-        <div id="errorBox" class="error hidden"></div>
+</main>
 
-    </main>
-
-    <footer class="footer">
-        <p>Files are processed on the server and removed automatically after a short time.</p>
-    </footer>
-
+<!-- Minimal Privacy Modal -->
+<div id="privacyModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+        <div class="modal-top">
+            <div class="modal-title-row">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <h3>Privacy by Architecture</h3>
+            </div>
+            <button id="closePrivacyModalBtn" class="modal-close" type="button">✕</button>
+        </div>
+        <div class="modal-body">
+            <p class="modal-lead">We believe your documents belong to you. Here is how our architecture guarantees your privacy:</p>
+            <div class="privacy-points">
+                <div class="point-item">
+                    <strong>1. Pure In-Memory Processing</strong>
+                    <p>Uploaded documents are streamed directly into isolated RAM buffers for manipulation and are never written to disk or permanent databases.</p>
+                </div>
+                <div class="point-item">
+                    <strong>2. 30-Minute Automatic Purge</strong>
+                    <p>Generated download files are assigned random UUID tokens and are permanently purged by an automated background cleaner after 30 minutes.</p>
+                </div>
+                <div class="point-item">
+                    <strong>3. Zero Document Mining or Selling</strong>
+                    <p>We do not train models on your files, track document text, inspect personal information, or share data with advertisers.</p>
+                </div>
+                <div class="point-item">
+                    <strong>4. Local &amp; Private AI Engine</strong>
+                    <p>Our document summarizer and Q&amp;A run on-premise using an embedded offline NLP engine, ensuring no document text leaves the server unless an external API key is explicitly configured.</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="dismissPrivacyModalBtn" class="primary-btn small-btn" type="button">Understood</button>
+        </div>
+    </div>
 </div>
+
+<!-- Compact Footer -->
+<footer class="app-footer">
+    <div class="footer-container">
+        <div class="footer-left">
+            <div class="footer-brand">
+                <svg width="18" height="18" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="28" height="28" rx="6" fill="#0F172A"/>
+                    <path d="M8 7H16L20 11V21C20 21.5523 19.5523 22 19 22H8C7.44772 22 7 21.5523 7 21V8C7 7.44772 7.44772 7 8 7Z" stroke="#FFFFFF" stroke-width="2"/>
+                </svg>
+                <span>PDFPulse</span>
+            </div>
+            <p class="footer-tagline">Effortless, privacy-first PDF utility suite.</p>
+        </div>
+        <div class="footer-right">
+            <a href="#privacy" id="footerPrivacyLink" class="footer-link">Privacy Guarantee</a>
+            <span class="crumb-slash">•</span>
+            <span class="footer-copy">© 2026 PDFPulse Studio. In-memory processing.</span>
+        </div>
+    </div>
+</footer>
 
 <script th:src="@{/script.js}" src="/script.js"></script>
 </body>

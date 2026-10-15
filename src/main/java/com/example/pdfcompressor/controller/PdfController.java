@@ -1,6 +1,7 @@
 package com.example.pdfcompressor.controller;
 
 import com.example.pdfcompressor.model.CompressionResponse;
+import com.example.pdfcompressor.service.FileStorageService;
 import com.example.pdfcompressor.service.PdfCompressionService;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -29,21 +30,12 @@ public class PdfController {
      * then it's evicted. Good enough for a single-instance demo app;
      * swap for a real store (disk, S3, Redis) for production use.
      */
-    private record StoredFile(String filename, byte[] data, Instant createdAt) {
-    }
-
-    private final Map<String, StoredFile> store = new ConcurrentHashMap<>();
+    private final FileStorageService storageService;
     private final PdfCompressionService compressionService;
 
-    public PdfController(PdfCompressionService compressionService) {
+    public PdfController(FileStorageService storageService, PdfCompressionService compressionService) {
+        this.storageService = storageService;
         this.compressionService = compressionService;
-
-        ScheduledExecutorService cleaner = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "compressed-file-cleaner");
-            t.setDaemon(true);
-            return t;
-        });
-        cleaner.scheduleAtFixedRate(this::evictExpired, 5, 5, TimeUnit.MINUTES);
     }
 
     @PostMapping("/compress")
@@ -73,8 +65,8 @@ public class PdfController {
 
             byte[] compressedBytes = compressionService.compress(originalBytes, compressionLevel);
 
-            String id = UUID.randomUUID().toString();
-            store.put(id, new StoredFile(buildDownloadName(originalFilename), compressedBytes, Instant.now()));
+            String downloadFilename = buildDownloadName(originalFilename);
+            String id = storageService.store(downloadFilename, MediaType.APPLICATION_PDF_VALUE, compressedBytes);
 
             CompressionResponse response = new CompressionResponse(
                     id,
@@ -99,13 +91,21 @@ public class PdfController {
 
     @GetMapping("/download/{id}")
     public ResponseEntity<byte[]> download(@PathVariable String id) {
-        StoredFile stored = store.get(id);
+        FileStorageService.StoredFile stored = storageService.get(id);
         if (stored == null) {
             return ResponseEntity.notFound().build();
         }
 
+        MediaType mediaType = MediaType.APPLICATION_PDF;
+        if (stored.contentType() != null) {
+            try {
+                mediaType = MediaType.parseMediaType(stored.contentType());
+            } catch (Exception ignored) {
+            }
+        }
+
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentType(mediaType);
         headers.setContentDisposition(
                 ContentDisposition.attachment().filename(stored.filename()).build());
 
@@ -119,10 +119,5 @@ public class PdfController {
                 ? originalFilename.substring(0, originalFilename.length() - 4)
                 : originalFilename;
         return base + "-compressed.pdf";
-    }
-
-    private void evictExpired() {
-        Instant cutoff = Instant.now().minus(Duration.ofMinutes(30));
-        store.entrySet().removeIf(entry -> entry.getValue().createdAt().isBefore(cutoff));
     }
 }

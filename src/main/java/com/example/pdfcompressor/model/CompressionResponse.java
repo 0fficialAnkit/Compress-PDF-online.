@@ -14,6 +14,8 @@ public class CompressionResponse {
     private double savingsPercent;
     private boolean success;
     private String message;
+    private String downloadUrl;
+    private java.util.Map<String, Object> data;
 
     public CompressionResponse() {
     }
@@ -26,9 +28,14 @@ public class CompressionResponse {
         this.compressedSize = compressedSize;
         this.success = success;
         this.message = message;
+        this.downloadUrl = id != null ? "/api/download/" + id : null;
         this.savingsPercent = originalSize > 0
                 ? (1.0 - ((double) compressedSize / (double) originalSize)) * 100.0
                 : 0.0;
+    }
+
+    public static CompressionResponse success(String id, String originalFilename, long originalSize, long compressedSize, String message) {
+        return new CompressionResponse(id, originalFilename, originalSize, compressedSize, true, message);
     }
 
     public static CompressionResponse failure(String originalFilename, String message) {
@@ -89,5 +96,21 @@ public class CompressionResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getDownloadUrl() {
+        return downloadUrl;
+    }
+
+    public void setDownloadUrl(String downloadUrl) {
+        this.downloadUrl = downloadUrl;
+    }
+
+    public java.util.Map<String, Object> getData() {
+        return data;
+    }
+
+    public void setData(java.util.Map<String, Object> data) {
+        this.data = data;
     }
 }
